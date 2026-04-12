@@ -1,0 +1,266 @@
+/* =========================================================
+   RAKTKOSH GLOBAL STYLES (The Missing Teammate CSS)
+   ========================================================= */
+
+/* --- 1. CSS VARIABLES (The Color Palette) --- */
+:root {
+  --bg: #f8f7f4;
+  --surface: #ffffff;
+  --text: #1a1a18;
+  --muted: #6b6b67;
+  --border: rgba(0, 0, 0, 0.08);
+  --red: #E24B4A;
+  --red-dark: #C93938;
+  --red-light: #FDF4F4;
+  --teal: #20C997;
+  --amber: #F59E0B;
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+
+/* --- 2. BASE RESETS --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- 3. LAYOUT & CONTAINERS --- */
+.page-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.page-header p {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
+
+/* --- 4. CARDS --- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 1.25rem;
+  color: var(--text);
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+/* --- 5. FORMS & INPUTS --- */
+.field { margin-bottom: 1.25rem; }
+.field-row { display: flex; gap: 1rem; }
+.field-row .field { flex: 1; margin-bottom: 1.25rem; }
+
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.field input, .field select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: var(--surface);
+}
+
+.field input:focus, .field select:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(226, 75, 74, 0.1);
+}
+
+/* --- 6. BUTTONS --- */
+.btn-primary {
+  background: var(--red);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary:hover:not(:disabled) { background: var(--red-dark); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* --- 7. BLOOD GRID (The Interactive Badges) --- */
+.blood-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.blood-badge {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem;
+  min-width: 65px;
+  text-align: center;
+  background: var(--surface);
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.blood-badge:hover { border-color: var(--red); transform: translateY(-1px); }
+
+.blood-badge.selected {
+  background: var(--red-light);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.blood-badge .type { font-weight: 600; font-size: 1.25rem; }
+.blood-badge .units { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; font-weight: 500; }
+
+/* --- 8. DASHBOARD METRICS --- */
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label { font-size: 0.85rem; color: var(--muted); font-weight: 500; margin-bottom: 0.5rem; }
+.metric-value { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1; }
+
+/* --- 9. TABS --- */
+.tab-bar {
+  display: flex;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 0;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--red); }
+
+/* --- 10. TABLES --- */
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 1rem 0.5rem; border-bottom: 1px solid var(--border); }
+th { font-weight: 500; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+td { font-size: 0.95rem; color: var(--text); }
+tbody tr:last-child td { border-bottom: none; }
+
+/* --- 11. BADGES & ALERTS --- */
+.badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-success { background: #E6F4EA; color: #1E8E3E; }
+.badge-danger { background: #FCE8E6; color: #D93025; }
+.badge-warning { background: #FEF7E0; color: #B06000; }
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.alert-error { background: #FCE8E6; color: #D93025; border: 1px solid #FAD2CF; }
+.alert-success { background: #E6F4EA; color: #1E8E3E; border: 1px solid #CEEAD6; }
+
+/* --- 12. DONATION DRIVES --- */
+.drive-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  background: var(--surface);
+  transition: box-shadow 0.2s;
+}
+
+.drive-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+.drive-date-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+  text-align: center;
+  min-width: 60px;
+}
+
+.drive-date-box .month { font-size: 0.75rem; color: var(--red); font-weight: 700; margin-bottom: 0.1rem; }
+.drive-date-box .day { font-size: 1.4rem; font-weight: 700; color: var(--text); line-height: 1; }
+
+.page-header {
+  margin-bottom: 2rem;
+  text-align: center; /* 👈 ADD THIS LINE */
+}
+
+.page-header h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+}
