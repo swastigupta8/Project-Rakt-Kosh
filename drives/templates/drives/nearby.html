@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Donation Drives &mdash; Rakt-Kosh{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Donation Drives Near You</h2>
+
+<form method="get" class="row g-2 mb-4">
+  <div class="col-sm-8">
+    <input type="text" name="city" value="{{ query_city }}" class="form-control" placeholder="Your city, e.g. Pune, India" required>
+  </div>
+  <div class="col-sm-4">
+    <button type="submit" class="btn btn-danger w-100">Search</button>
+  </div>
+</form>
+
+{% if error %}
+  <div class="alert alert-warning">{{ error }}</div>
+{% elif results is not None %}
+  {% if results %}
+    <div class="list-group">
+      {% for drive in results %}
+        <div class="list-group-item card-result mb-2">
+          <div class="d-flex justify-content-between">
+            <h5 class="mb-1">{{ drive.title }}</h5>
+            <span class="badge bg-secondary distance-badge">{{ drive.distance_km }} km away</span>
+          </div>
+          <p class="mb-1 text-muted">{{ drive.address }}, {{ drive.city }}</p>
+          <p class="mb-0">Hosted by <strong>{{ drive.bank.bank_name }}</strong> on {{ drive.date }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">No upcoming donation drives found near "{{ query_city }}".</div>
+  {% endif %}
+{% endif %}
+{% endblock %}

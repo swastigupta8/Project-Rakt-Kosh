@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Find Blood &mdash; Rakt-Kosh{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Find Blood Nearby</h2>
+
+<form method="get" class="row g-2 mb-4">
+  <div class="col-sm-5">
+    <input type="text" name="city" value="{{ query_city }}" class="form-control" placeholder="Your city, e.g. Pune, India" required>
+  </div>
+  <div class="col-sm-4">
+    <select name="blood_group" class="form-select">
+      <option value="">Any blood group</option>
+      {% for value, label in blood_groups %}
+        <option value="{{ value }}" {% if value == blood_group %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-3">
+    <button type="submit" class="btn btn-danger w-100">Search</button>
+  </div>
+</form>
+
+{% if error %}
+  <div class="alert alert-warning">{{ error }}</div>
+{% elif results is not None %}
+  {% if results %}
+    <div class="list-group">
+      {% for entry in results %}
+        <div class="list-group-item card-result mb-2">
+          <div class="d-flex justify-content-between">
+            <h5 class="mb-1">{{ entry.bank.bank_name }}</h5>
+            <span class="badge bg-secondary distance-badge">{{ entry.distance_km }} km away</span>
+          </div>
+          <p class="mb-1 text-muted">{{ entry.bank.address }}, {{ entry.bank.city }}</p>
+          <div>
+            {% for group, qty in entry.groups.items %}
+              <span class="badge bg-danger me-1">{{ group }}: {{ qty }} units</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">No blood banks with matching active stock found near "{{ query_city }}".</div>
+  {% endif %}
+{% endif %}
+{% endblock %}

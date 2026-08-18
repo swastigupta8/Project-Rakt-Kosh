@@ -1,0 +1,38 @@
+:root {
+  --rk-red: #c0392b;
+  --rk-red-dark: #922b21;
+}
+
+body {
+  background-color: #fafafa;
+}
+
+.navbar.bg-danger {
+  background-color: var(--rk-red) !important;
+}
+
+.btn-danger {
+  background-color: var(--rk-red);
+  border-color: var(--rk-red);
+}
+
+.btn-danger:hover {
+  background-color: var(--rk-red-dark);
+  border-color: var(--rk-red-dark);
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--rk-red), var(--rk-red-dark));
+  color: #fff;
+  border-radius: 0.75rem;
+  padding: 3rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.card-result {
+  border-left: 4px solid var(--rk-red);
+}
+
+.distance-badge {
+  font-variant-numeric: tabular-nums;
+}

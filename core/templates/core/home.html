@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Rakt-Kosh &mdash; Find blood nearby{% endblock %}
+
+{% block content %}
+<div class="hero text-center">
+  <h1 class="display-5 fw-bold">Find blood. Save a life.</h1>
+  <p class="lead mb-4">
+    Rakt-Kosh connects patients with nearby blood banks' live stock and donation drives,
+    and gives blood banks a simple way to keep that stock up to date.
+  </p>
+  <a href="{% url 'inventory:search' %}" class="btn btn-light btn-lg me-2">Find Blood Now</a>
+  <a href="{% url 'blood_requests:submit' %}" class="btn btn-outline-light btn-lg">Request Blood</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">🔎 Search nearby stock</h5>
+        <p class="card-text">Search by city and blood group to see which nearby blood banks have units in stock, ranked by distance.</p>
+        <a href="{% url 'inventory:search' %}" class="btn btn-outline-danger btn-sm">Search blood</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">🩸 Find a donation drive</h5>
+        <p class="card-text">Browse donation drives organized by blood banks and hospitals near you.</p>
+        <a href="{% url 'drives:nearby' %}" class="btn btn-outline-danger btn-sm">Browse drives</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">🏥 Manage your bank's stock</h5>
+        <p class="card-text">Blood banks and hospitals can register to keep their live inventory and drives current.</p>
+        <a href="{% url 'accounts:register_bank' %}" class="btn btn-outline-danger btn-sm">Register your bank</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

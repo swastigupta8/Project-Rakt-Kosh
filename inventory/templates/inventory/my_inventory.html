@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}My Inventory &mdash; Rakt-Kosh{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">My Inventory</h2>
+  <a href="{% url 'inventory:add_unit' %}" class="btn btn-danger">+ Add Stock</a>
+</div>
+
+{% if units %}
+  <table class="table">
+    <thead>
+      <tr><th>Blood Group</th><th>Quantity</th><th>Collected On</th><th>Expires On</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for unit in units %}
+        <tr class="{% if unit.is_expired %}table-secondary{% endif %}">
+          <td>{{ unit.blood_group }}</td>
+          <td>{{ unit.quantity }}</td>
+          <td>{{ unit.collected_on }}</td>
+          <td>{{ unit.expires_on }}</td>
+          <td>
+            {% if unit.is_expired %}
+              <span class="badge bg-secondary">Expired</span>
+            {% else %}
+              <span class="badge bg-success">Active</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="alert alert-info">No inventory yet. Add your first blood unit.</div>
+{% endif %}
+{% endblock %}

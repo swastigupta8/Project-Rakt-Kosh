@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Add Blood Stock &mdash; Rakt-Kosh{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <h2 class="mb-3">Add Blood Stock</h2>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-danger w-100">Add to Inventory</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

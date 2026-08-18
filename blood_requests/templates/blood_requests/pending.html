@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Pending Requests &mdash; Rakt-Kosh{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Pending Blood Requests (nearest first)</h2>
+
+{% if results %}
+  <div class="list-group">
+    {% for req in results %}
+      <div class="list-group-item card-result mb-2">
+        <div class="d-flex justify-content-between">
+          <h5 class="mb-1">{{ req.requester_name }} &mdash; {{ req.blood_group }} x{{ req.units_needed }}</h5>
+          <span class="badge bg-secondary distance-badge">{{ req.distance_km }} km away</span>
+        </div>
+        <p class="mb-1 text-muted">{{ req.city }} &middot; {{ req.phone }}</p>
+        <p class="mb-2 small text-muted">Requested {{ req.created_at }}</p>
+        <form method="post" action="{% url 'blood_requests:mark_fulfilled' req.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-danger btn-sm">Mark as Fulfilled</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info">No pending blood requests right now.</div>
+{% endif %}
+{% endblock %}
