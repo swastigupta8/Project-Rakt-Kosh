@@ -108,16 +108,14 @@ python manage.py test
 2. **Web service** — create a new Web Service on [Render](https://render.com)
    pointing at this repo:
    - Build command: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
-   - Start command: `gunicorn raktkosh.wsgi`
+   - Start command: `python manage.py migrate --noinput && python manage.py import_real_banks && gunicorn raktkosh.wsgi`
+     (the free tier has no Shell/one-off jobs, so migrations and the real-data
+     import run as part of every startup instead — both are safe to repeat:
+     `migrate` is idempotent, and `import_real_banks` skips rows it's already
+     imported. See `Procfile`.)
    - Environment variables: `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS` (your
      `.onrender.com` domain), `DATABASE_URL` (from Neon).
-3. Run migrations and load real data against the production database once
-   (via Render's shell or a one-off job):
-   ```bash
-   python manage.py migrate
-   python manage.py import_real_banks
-   ```
-4. Visit the live `.onrender.com` URL.
+3. Visit the live `.onrender.com` URL once the first deploy finishes.
 
 ## License / data attribution
 
