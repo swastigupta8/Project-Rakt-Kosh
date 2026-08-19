@@ -48,6 +48,19 @@ class SearchViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'Test Bank')
 
+    @patch('inventory.views.geocode', return_value=FAKE_COORDS)
+    def test_search_without_group_shows_bank_even_without_matching_stock(self, mock_geocode):
+        # A bank with no active stock at all should still surface in the general
+        # "any blood group" search, so imported real directory listings aren't invisible.
+        BloodBankProfile.objects.create(
+            bank_name='Stockless Bank', address='addr', city='Pune', latitude=18.52, longitude=73.85,
+        )
+        response = self.client.get(reverse('inventory:search'), {'city': 'Pune, India'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Bank')
+        self.assertContains(response, 'Stockless Bank')
+        self.assertContains(response, 'No live stock reported yet')
+
     def test_search_without_city_shows_no_results(self):
         response = self.client.get(reverse('inventory:search'))
         self.assertEqual(response.status_code, 200)

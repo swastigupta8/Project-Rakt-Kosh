@@ -33,16 +33,25 @@
             <span class="badge bg-secondary distance-badge">{{ entry.distance_km }} km away</span>
           </div>
           <p class="mb-1 text-muted">{{ entry.bank.address }}, {{ entry.bank.city }}</p>
-          <div>
-            {% for group, qty in entry.groups.items %}
-              <span class="badge bg-danger me-1">{{ group }}: {{ qty }} units</span>
-            {% endfor %}
-          </div>
+          {% if entry.groups %}
+            <div>
+              {% for group, qty in entry.groups.items %}
+                <span class="badge bg-danger me-1">{{ group }}: {{ qty }} units</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="mb-0 small text-muted">
+              No live stock reported yet.
+              {% if entry.bank.phone %}Contact directly: {{ entry.bank.phone }}{% endif %}
+            </p>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
+  {% elif blood_group %}
+    <div class="alert alert-info">No blood banks with {{ blood_group }} in active stock found near "{{ query_city }}".</div>
   {% else %}
-    <div class="alert alert-info">No blood banks with matching active stock found near "{{ query_city }}".</div>
+    <div class="alert alert-info">No blood banks found near "{{ query_city }}".</div>
   {% endif %}
 {% endif %}
 {% endblock %}
