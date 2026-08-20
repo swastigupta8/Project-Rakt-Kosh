@@ -1,8 +1,14 @@
+from unittest.mock import MagicMock, patch
+
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import BloodBankProfile, DonorProfile, User
+from blood_requests.models import BloodRequest
 from core.geo import distance_km, sorted_by_distance
+from drives.models import DonationDrive
+from inventory.models import BloodUnit
 
 
 class HomeViewTests(TestCase):
@@ -36,6 +42,39 @@ class HomeViewTests(TestCase):
         self.assertContains(response, 'Manage Inventory')
         self.assertContains(response, 'Post a Drive')
         self.assertContains(response, 'Pending Requests')
+
+
+class PopulateDemoContentTests(TestCase):
+    def test_missing_accounts_is_a_no_op(self):
+        call_command('populate_demo_content', donor='nope', bank='nope')
+        self.assertEqual(BloodRequest.objects.count(), 0)
+
+    @patch('core.management.commands.populate_demo_content.RateLimiter', lambda func, **kwargs: func)
+    @patch('core.management.commands.populate_demo_content.Nominatim')
+    def test_populates_and_is_idempotent(self, mock_nominatim_cls):
+        fake_result = MagicMock(latitude=18.52, longitude=73.85)
+        mock_nominatim_cls.return_value.geocode.return_value = fake_result
+
+        User.objects.create_user(
+            username='swastigupta', password='x', first_name='Swasti', last_name='Gupta', role=User.Role.DONOR,
+        )
+        bank_user = User.objects.create_user(username='testbloodbank', password='x', role=User.Role.BANK)
+        bank = BloodBankProfile.objects.create(
+            user=bank_user, bank_name='Test Blood Bank', address='addr', city='Pune',
+            latitude=18.5204, longitude=73.8567,
+        )
+
+        call_command('populate_demo_content')
+
+        self.assertEqual(BloodRequest.objects.filter(requester_name='Swasti Gupta').count(), 5)
+        self.assertEqual(DonationDrive.objects.filter(bank=bank).count(), 3)
+        self.assertEqual(BloodUnit.objects.filter(bank=bank).count(), 7)
+
+        call_command('populate_demo_content')
+
+        self.assertEqual(BloodRequest.objects.filter(requester_name='Swasti Gupta').count(), 5)
+        self.assertEqual(DonationDrive.objects.filter(bank=bank).count(), 3)
+        self.assertEqual(BloodUnit.objects.filter(bank=bank).count(), 7)
 
 
 class DistanceHelperTests(TestCase):
