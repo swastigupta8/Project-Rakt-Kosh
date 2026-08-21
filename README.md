@@ -1,134 +1,120 @@
 # Rakt-Kosh
 
-Rakt-Kosh (रक्तकोष — "blood repository") connects patients with nearby blood banks'
-live stock and donation drives, and gives blood banks a simple way to keep that
-stock current.
+Rakt-Kosh (रक्तकोष — "blood repository") is a blood donation platform. Patients can
+search for blood by city and blood group, browse upcoming donation drives, and submit
+a request without creating an account. Blood banks and hospitals can register, manage
+their own live inventory, and see nearby requests ranked by distance.
 
-- **Patients / donors** can search for blood by city and blood group, browse
-  upcoming donation drives near them, and submit a blood request — no account
-  required.
-- **Blood banks / hospitals** can register, manage their live blood inventory,
-  post donation drives, and see pending requests near them, nearest first.
+**Live:** https://raktkosh-nims.onrender.com
+(demo accounts below if you want to see both sides of it)
 
-Built with Django, server-rendered templates, and real geolocation-based
-matching — no separate JS framework, no external services beyond a database
-and free geocoding.
+## Screenshots
 
-## Why it's built this way
+*(drop images into `docs/screenshots/` and reference them here, e.g.
+`![Donor dashboard](docs/screenshots/donor-dashboard.png)` — see
+`docs/screenshots/README.md` for suggested shots to grab)*
 
-This is a ground-up rebuild of an earlier version of this project (originally
-React + FastAPI + MySQL) that had grown out of an early, "just get something
-on the resume" attempt — the previous version had no authentication on any
-endpoint, a database password committed to source control, and no working
-deployment. This rebuild is a straight Django app on purpose:
+## The story behind it
 
-- **One language, top to bottom.** Django + server-rendered templates, no
-  separate frontend build step.
-- **Auth is Django's, not hand-rolled.** A custom `User` model with a `role`
-  field, `login_required` + role-check decorators, and real sessions —
-  closing the biggest gap in the earlier version.
-- **No secrets in source.** `SECRET_KEY`/`DEBUG`/`DATABASE_URL` all come from
-  environment variables; `.env` is gitignored, `.env.example` documents what's
-  needed.
-- **Distance ranking in plain Python**, not a database-specific spatial
-  function — `geopy` geocodes a place name once, `geopy.distance.geodesic`
-  ranks results. Easy to read top to bottom, portable across databases.
+I originally built this as a React + FastAPI + MySQL project, mostly to have something
+finished for my resume. It worked, but it showed — there was no authentication on any
+endpoint, a database password committed straight into the repo, and it never actually
+got deployed anywhere. Once I had time to slow down and do it properly, I rewrote the
+whole thing from scratch in Django, in a language I'm actually confident in, and tried
+to fix every one of those mistakes on purpose instead of patching over them.
 
-## Real data, honestly
+A few decisions I made along the way:
 
-The app ships pre-loaded with **2,400+ real blood bank locations across
-India**, sourced from the National Health Portal's Blood Bank Directory (via
-[data.gov.in](https://data.gov.in) / ArcGIS Hub open data — see
-`data/blood_banks.csv`, imported with `manage.py import_real_banks`). These
-are real facility names, addresses, and coordinates, so search results aren't
-fake.
+- Everything is one language end to end — Django with server-rendered templates, no
+  separate frontend build step to maintain.
+- Auth uses Django's own system instead of anything hand-rolled: a custom `User` model
+  with a `role` field, `login_required` plus role-check decorators, and real sessions.
+- No secrets live in the source. `SECRET_KEY`, `DEBUG`, and `DATABASE_URL` all come
+  from environment variables, and `.env` is gitignored.
+- Distance ranking between patients and blood banks happens in plain Python
+  (`geopy.distance.geodesic`) instead of a database-specific spatial function, so it's
+  easy to read top to bottom and doesn't lock the app to one database engine.
 
-What's *not* faked: a real facility's **live stock**. `BloodBankProfile` rows
-imported this way have no linked user account (`user=None`) — nobody has
-consented to a login on that organization's behalf, so nobody but the actual
-bank can enter stock for it. That means imported real banks show up in search
-and on the map, but their inventory starts empty until a real account claims
-it. A handful of demo bank accounts (`manage.py seed_demo`) exist purely so
-there's something with live stock to click through locally.
+## Real data, not just demo rows
+
+The app ships with over 2,400 real blood bank locations across India, pulled from the
+National Health Portal's Blood Bank Directory (open government data via data.gov.in /
+ArcGIS Hub — see `data/blood_banks.csv`). These are real names, addresses, and
+coordinates, so searching near an actual city returns actual hospitals, not placeholder
+text.
+
+What I didn't fake is live stock. Blood bank profiles imported from that directory
+don't have a login attached — I don't have those organizations' consent to create
+accounts on their behalf — so they show up in search, but their inventory starts empty
+until the real bank registers and enters stock themselves. That's the honest version of
+the feature, even though it means most of the map starts at zero. The demo accounts
+below exist so there's at least one bank with live stock to actually click through.
 
 ## Tech stack
 
-- **Backend / frontend**: Django 6.1, server-rendered templates, Bootstrap 5
-  (CDN, no JS build step)
-- **Database**: PostgreSQL in production, SQLite for local dev (switches
-  automatically based on whether `DATABASE_URL` is set)
-- **Geocoding & distance**: `geopy` (Nominatim/OpenStreetMap)
-- **Static files**: WhiteNoise
-- **Deployment target**: Render (web) + Neon (Postgres)
-
-## Project structure
+Django 6.1, server-rendered templates with Bootstrap 5, PostgreSQL in production
+(SQLite for local dev), `geopy` for geocoding and distance, WhiteNoise for static
+files. Deployed on Render, database on Neon.
 
 ```
-raktkosh/            Django project config (settings, urls, wsgi)
+raktkosh/            project config (settings, urls, wsgi)
 core/                 home page, base template, shared geo/constants helpers,
-                      management commands (seed_demo, import_real_banks)
+                      management commands (seed_demo, import_real_banks, populate_demo_content)
 accounts/             custom User, DonorProfile, BloodBankProfile, auth
 inventory/            BloodUnit model, add/search stock
 drives/               DonationDrive model, create/search drives
 blood_requests/       BloodRequest model, submit/pending requests
 templates/            base.html, shared partials (navbar, messages)
 static/css/           custom.css (layered on Bootstrap)
-data/blood_banks.csv  real blood bank directory (see "Real data" above)
+data/blood_banks.csv  real blood bank directory (see above)
 ```
 
-## Local setup
+## Try it yourself
+
+Both use password `raktkosh123`:
+
+- `demo_donor` ("Demo User") — a few live requests across different cities
+- `demo_bank` ("Demo Blood Bank") — live stock across every blood group, plus a couple of posted drives
+
+## Running it locally
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate          # Windows; use `source .venv/bin/activate` on macOS/Linux
 pip install -r requirements.txt
 
-copy .env.example .env          # then edit SECRET_KEY etc.
+copy .env.example .env          # then fill in SECRET_KEY etc.
 
 python manage.py migrate
 python manage.py import_real_banks       # loads the real blood bank directory
-python manage.py populate_demo_content   # creates Demo User / Demo Blood Bank with sample activity
-python manage.py seed_demo               # optional: adds a wider set of demo donors/banks/stock
+python manage.py populate_demo_content   # creates the demo accounts above
 python manage.py runserver
 ```
 
-`populate_demo_content` is fully self-contained: it creates (or reuses) a `demo_donor`
-("Demo User") donor account and a `demo_bank` ("Demo Blood Bank") bank account —
-both password `raktkosh123` — and gives them a few blood requests, drives, and
-blood stock so there's something real to click through. It's idempotent and
-runs automatically on every deploy (see `Procfile`).
+There's also `python manage.py seed_demo` if you want a wider spread of throwaway
+donor/bank accounts for local testing.
 
-`seed_demo` additionally creates a wider throwaway set purely for local testing
-(all password `raktkosh123`): `donor_asha`, `donor_rahul`, `donor_priya`,
-`donor_kabir` (donors) and `bank_sunrise`, `bank_lifeline`, `bank_hope` (blood banks).
-
-## Running tests
+## Tests
 
 ```bash
 python manage.py test
 ```
 
-## Deployment (Render + Neon)
+## Deploying it (Render + Neon)
 
-1. **Database** — create a free Postgres project on [Neon](https://neon.tech),
-   copy its connection string.
-2. **Web service** — create a new Web Service on [Render](https://render.com)
-   pointing at this repo:
+1. Create a free Postgres project on [Neon](https://neon.tech) and grab its connection
+   string.
+2. Create a Web Service on [Render](https://render.com) pointing at this repo:
    - Build command: `pip install -r requirements.txt`
    - Start command: `python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py import_real_banks && python manage.py populate_demo_content && gunicorn raktkosh.wsgi`
-     (the free tier has no Shell/one-off jobs, so static collection, migrations,
-     and demo/real data population all run as part of every startup instead —
-     all four are safe to repeat. Also: `collectstatic` doesn't need a database,
-     but Django's settings module requires `DATABASE_URL` just to load in
-     production, so it can't run during the *build* step, where Render may not
-     expose the same environment as the running service — hence it's chained
-     into the start command instead. See `Procfile`.)
+     (the free tier has no shell access, so static collection, migrations, and data
+     population all run on every startup instead — all four are safe to repeat. See
+     `Procfile`.)
    - Environment variables: `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS` (your
      `.onrender.com` domain), `DATABASE_URL` (from Neon).
-3. Visit the live `.onrender.com` URL once the first deploy finishes.
+3. Visit the live URL once the first deploy finishes.
 
-## License / data attribution
+## Data attribution
 
-Blood bank directory data in `data/blood_banks.csv` is derived from India's
-National Health Portal Blood Bank Directory, distributed as open government
-data.
+The blood bank directory in `data/blood_banks.csv` is derived from India's National
+Health Portal Blood Bank Directory, distributed as open government data.
