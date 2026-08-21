@@ -114,12 +114,15 @@ python manage.py test
    copy its connection string.
 2. **Web service** — create a new Web Service on [Render](https://render.com)
    pointing at this repo:
-   - Build command: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
-   - Start command: `python manage.py migrate --noinput && python manage.py import_real_banks && gunicorn raktkosh.wsgi`
-     (the free tier has no Shell/one-off jobs, so migrations and the real-data
-     import run as part of every startup instead — both are safe to repeat:
-     `migrate` is idempotent, and `import_real_banks` skips rows it's already
-     imported. See `Procfile`.)
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py import_real_banks && python manage.py populate_demo_content && gunicorn raktkosh.wsgi`
+     (the free tier has no Shell/one-off jobs, so static collection, migrations,
+     and demo/real data population all run as part of every startup instead —
+     all four are safe to repeat. Also: `collectstatic` doesn't need a database,
+     but Django's settings module requires `DATABASE_URL` just to load in
+     production, so it can't run during the *build* step, where Render may not
+     expose the same environment as the running service — hence it's chained
+     into the start command instead. See `Procfile`.)
    - Environment variables: `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS` (your
      `.onrender.com` domain), `DATABASE_URL` (from Neon).
 3. Visit the live `.onrender.com` URL once the first deploy finishes.
