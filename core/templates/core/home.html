@@ -77,13 +77,12 @@
       Rakt-Kosh connects patients with nearby blood banks' live stock and donation drives,
       and gives blood banks a simple way to keep that stock up to date.
     </p>
-    <a href="{% url 'inventory:search' %}" class="btn btn-light btn-lg me-2">Find Blood Now</a>
-    <a href="{% url 'blood_requests:submit' %}" class="btn btn-outline-light btn-lg">Request Blood</a>
+    <a href="{% url 'inventory:search' %}" class="btn btn-danger btn-lg me-2">Find Blood Now</a>
+    <a href="{% url 'blood_requests:submit' %}" class="btn btn-danger btn-lg">Request Blood</a>
   </div>
 
   <div class="section-heading">
     <h2>For Donors &amp; Patients</h2>
-    <span class="section-tag">No account required</span>
   </div>
   <div class="action-grid">
     <a href="{% url 'inventory:search' %}" class="action-card">
@@ -105,7 +104,6 @@
 
   <div class="section-heading">
     <h2>For Blood Banks &amp; Hospitals</h2>
-    <span class="section-tag">Register to unlock</span>
   </div>
   <div class="action-grid">
     <a href="{% url 'accounts:register_bank' %}" class="action-card">

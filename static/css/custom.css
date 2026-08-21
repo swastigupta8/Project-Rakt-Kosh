@@ -11,8 +11,8 @@
   --rk-border: rgba(237, 235, 222, .10);
   --rk-border-strong: rgba(237, 235, 222, .18);
 
-  --rk-radius-lg: 22px;
-  --rk-radius-md: 14px;
+  --rk-radius-lg: 28px;
+  --rk-radius-md: 20px;
   --rk-shadow-sm: 0 1px 2px rgba(0, 0, 0, .25);
   --rk-shadow-md: 0 6px 20px rgba(0, 0, 0, .35);
   --rk-shadow-lg: 0 18px 40px rgba(0, 0, 0, .45);
@@ -56,15 +56,11 @@ a { color: var(--rk-accent); }
   gap: .55rem;
   letter-spacing: -0.01em;
 }
-.navbar-brand::before {
-  content: "";
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--rk-cherry);
-  box-shadow: 0 0 0 3px rgba(129, 1, 0, .25);
-  display: inline-block;
+.navbar-logo {
+  display: inline-flex;
+  color: var(--rk-cherry);
 }
+.navbar-logo svg { width: 20px; height: 20px; }
 .navbar .nav-link {
   color: var(--rk-cream-dim) !important;
   font-weight: 500;
@@ -96,46 +92,23 @@ a { color: var(--rk-accent); }
   transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease, border-color .15s ease, color .15s ease;
 }
 .btn:hover { transform: translateY(-1px); }
-.btn-danger {
+/* One consistent red button everywhere — no light/cream or outline variants. */
+.btn-danger,
+.btn-outline-danger,
+.btn-light,
+.btn-outline-light {
   background: var(--rk-cherry);
   border-color: var(--rk-cherry);
   color: var(--rk-cream);
 }
-.btn-danger:hover {
+.btn-danger:hover,
+.btn-outline-danger:hover,
+.btn-light:hover,
+.btn-outline-light:hover {
   background: var(--rk-maroon);
   border-color: var(--rk-maroon);
+  color: var(--rk-cream);
   box-shadow: var(--rk-shadow-md);
-  color: var(--rk-cream);
-}
-.btn-outline-danger {
-  color: var(--rk-cream);
-  border-color: var(--rk-border-strong);
-  background: transparent;
-}
-.btn-outline-danger:hover {
-  background: var(--rk-cherry);
-  border-color: var(--rk-cherry);
-  color: var(--rk-cream);
-  box-shadow: var(--rk-shadow-sm);
-}
-.btn-light {
-  background: var(--rk-cream);
-  border-color: var(--rk-cream);
-  color: var(--rk-noir);
-}
-.btn-light:hover {
-  background: #fff;
-  border-color: #fff;
-  color: var(--rk-noir);
-}
-.btn-outline-light {
-  color: var(--rk-cream);
-  border-color: rgba(237, 235, 222, .5);
-}
-.btn-outline-light:hover {
-  background: rgba(237, 235, 222, .12);
-  border-color: var(--rk-cream);
-  color: var(--rk-cream);
 }
 
 /* ---------- Hero ---------- */
@@ -214,12 +187,6 @@ main > * { animation: rk-fade-in .5s ease both; }
   font-size: 1.3rem;
   margin: 0;
 }
-.section-heading .section-tag {
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  font-size: .75rem;
-  color: var(--rk-cream-dim);
-}
 
 /* ---------- Action cards ---------- */
 .action-grid {
@@ -229,7 +196,9 @@ main > * { animation: rk-fade-in .5s ease both; }
 }
 .action-card {
   display: block;
-  background: var(--rk-surface);
+  background:
+    radial-gradient(140% 130% at 100% 0%, rgba(129, 1, 0, .45) 0%, rgba(129, 1, 0, 0) 60%),
+    var(--rk-surface);
   border: 1px solid var(--rk-border);
   border-radius: var(--rk-radius-lg);
   padding: 1.75rem;
@@ -241,7 +210,9 @@ main > * { animation: rk-fade-in .5s ease both; }
   transform: translateY(-3px);
   box-shadow: var(--rk-shadow-lg);
   border-color: var(--rk-cherry);
-  background: var(--rk-surface-2);
+  background:
+    radial-gradient(140% 130% at 100% 0%, rgba(129, 1, 0, .65) 0%, rgba(129, 1, 0, 0) 65%),
+    var(--rk-surface-2);
 }
 .action-icon {
   display: inline-flex;
@@ -312,7 +283,7 @@ main > * { animation: rk-fade-in .5s ease both; }
 /* ---------- Forms ---------- */
 .form-control, .form-select {
   background: var(--rk-surface-2);
-  border-radius: 10px;
+  border-radius: 14px;
   border: 1px solid var(--rk-border-strong);
   color: var(--rk-cream);
   padding: .6rem .85rem;

@@ -1,35 +1,26 @@
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
   <div class="container">
-    <a class="navbar-brand" href="{% url 'core:home' %}">Rakt-Kosh</a>
+    <a class="navbar-brand" href="{% url 'core:home' %}">
+      <span class="navbar-logo">{% include "partials/icons/_droplet.html" %}</span>
+      Rakt-Kosh
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="{% url 'inventory:search' %}">Find Blood</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'drives:nearby' %}">Donation Drives</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'blood_requests:submit' %}">Request Blood</a></li>
-
-        {% if user.is_authenticated and user.role == 'bank' %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'inventory:my_inventory' %}">My Inventory</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'drives:create' %}">Post a Drive</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'blood_requests:pending' %}">Pending Requests</a></li>
-        {% endif %}
-      </ul>
-
+    <div class="collapse navbar-collapse justify-content-end" id="navMenu">
       <ul class="navbar-nav align-items-lg-center">
         {% if user.is_authenticated %}
           <li class="nav-item"><span class="nav-link disabled">{{ user.username }}</span></li>
           <li class="nav-item">
             <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
               {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-outline-danger ms-lg-2">Logout</button>
+              <button type="submit" class="btn btn-sm btn-danger ms-lg-2">Logout</button>
             </form>
           </li>
         {% else %}
           <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Login</a></li>
           <li class="nav-item"><a class="btn btn-sm btn-danger ms-lg-2" href="{% url 'accounts:register_donor' %}">Register as Donor</a></li>
-          <li class="nav-item"><a class="btn btn-sm btn-outline-danger ms-lg-2" href="{% url 'accounts:register_bank' %}">Register as Blood Bank</a></li>
+          <li class="nav-item"><a class="btn btn-sm btn-danger ms-lg-2" href="{% url 'accounts:register_bank' %}">Register as Blood Bank</a></li>
         {% endif %}
       </ul>
     </div>
