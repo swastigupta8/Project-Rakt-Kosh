@@ -86,14 +86,21 @@ pip install -r requirements.txt
 copy .env.example .env          # then edit SECRET_KEY etc.
 
 python manage.py migrate
-python manage.py import_real_banks   # loads the real blood bank directory
-python manage.py seed_demo           # optional: adds demo donors/banks/stock you can log into
+python manage.py import_real_banks       # loads the real blood bank directory
+python manage.py populate_demo_content   # creates Demo User / Demo Blood Bank with sample activity
+python manage.py seed_demo               # optional: adds a wider set of demo donors/banks/stock
 python manage.py runserver
 ```
 
-Demo accounts created by `seed_demo` (all use password `raktkosh123`):
-`donor_asha`, `donor_rahul`, `donor_priya`, `donor_kabir` (donors) and
-`bank_sunrise`, `bank_lifeline`, `bank_hope` (blood banks).
+`populate_demo_content` is fully self-contained: it creates (or reuses) a `demo_donor`
+("Demo User") donor account and a `demo_bank` ("Demo Blood Bank") bank account —
+both password `raktkosh123` — and gives them a few blood requests, drives, and
+blood stock so there's something real to click through. It's idempotent and
+runs automatically on every deploy (see `Procfile`).
+
+`seed_demo` additionally creates a wider throwaway set purely for local testing
+(all password `raktkosh123`): `donor_asha`, `donor_rahul`, `donor_priya`,
+`donor_kabir` (donors) and `bank_sunrise`, `bank_lifeline`, `bank_hope` (blood banks).
 
 ## Running tests
 
