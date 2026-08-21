@@ -1,1 +1,1 @@
-web: python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py import_real_banks && python manage.py populate_demo_content && gunicorn raktkosh.wsgi --log-file -
+web: python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn raktkosh.wsgi --log-file -

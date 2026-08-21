@@ -106,13 +106,26 @@ python manage.py test
    string.
 2. Create a Web Service on [Render](https://render.com) pointing at this repo:
    - Build command: `pip install -r requirements.txt`
-   - Start command: `python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py import_real_banks && python manage.py populate_demo_content && gunicorn raktkosh.wsgi`
-     (the free tier has no shell access, so static collection, migrations, and data
-     population all run on every startup instead — all four are safe to repeat. See
-     `Procfile`.)
+   - Start command: `python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn raktkosh.wsgi`
+     (the free tier has no shell access, so static collection and migrations run on
+     every startup instead — both are cheap and safe to repeat. See `Procfile`.)
    - Environment variables: `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS` (your
      `.onrender.com` domain), `DATABASE_URL` (from Neon).
-3. Visit the live URL once the first deploy finishes.
+3. Load the real bank directory and demo accounts **once**, from your own machine,
+   pointed at the production database (there's no Render shell to run them from):
+   ```bash
+   DATABASE_URL=<your Neon connection string> python manage.py import_real_banks
+   DATABASE_URL=<your Neon connection string> python manage.py populate_demo_content
+   ```
+   These used to be chained into the start command so they'd run on every boot, but
+   `import_real_banks` does one existence-check query per CSV row — with 2,400+ rows,
+   that's 2,400+ round-trips to the database before the app can even start serving
+   requests. On Render's free tier, where the service spins down after ~15 minutes of
+   inactivity and has to cold-boot on the next visit, that turned every wake-up into a
+   several-minute hang. The data doesn't need re-checking on every restart — Postgres
+   already has it durably stored — so these only need to run again if the source CSV
+   changes.
+4. Visit the live URL once the first deploy finishes.
 
 ## Data attribution
 
