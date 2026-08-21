@@ -1,18 +1,23 @@
 # Rakt-Kosh
 
-Rakt-Kosh (रक्तकोष — "blood repository") is a blood donation platform. Patients can
+Rakt-Kosh (रक्तकोष) is a blood donation platform. Patients can
 search for blood by city and blood group, browse upcoming donation drives, and submit
 a request without creating an account. Blood banks and hospitals can register, manage
 their own live inventory, and see nearby requests ranked by distance.
 
 **Live:** https://raktkosh-nims.onrender.com
-(demo accounts below if you want to see both sides of it)
 
 ## Screenshots
-
-*(drop images into `docs/screenshots/` and reference them here, e.g.
-`![Donor dashboard](docs/screenshots/donor-dashboard.png)` — see
-`docs/screenshots/README.md` for suggested shots to grab)*
+<img width="1919" height="953" alt="image" src="https://github.com/user-attachments/assets/1fc4d8e2-ac4b-4b76-8c47-22daf316f6c1" />
+<img width="1919" height="483" alt="image" src="https://github.com/user-attachments/assets/1d63e64f-e8ad-4059-99e3-43c9f8109227" />
+<img width="1919" height="728" alt="image" src="https://github.com/user-attachments/assets/a8ad2fdf-b245-4065-92b8-993b45a88717" />
+<img width="1919" height="831" alt="image" src="https://github.com/user-attachments/assets/ba355771-03a6-49bb-9140-1999e48710b8" />
+<img width="1919" height="612" alt="image" src="https://github.com/user-attachments/assets/63872faa-c0e6-4cf9-a679-f36dc0670e77" />
+<img width="1919" height="1024" alt="image" src="https://github.com/user-attachments/assets/a3cf5f33-0098-4a3d-8573-9ca7d439b24e" />
+<img width="1919" height="936" alt="image" src="https://github.com/user-attachments/assets/3f62bbd8-579b-4cbe-9178-c42cfae07f5b" />
+<img width="1919" height="1002" alt="image" src="https://github.com/user-attachments/assets/4ae24b76-c876-412a-841d-6829afb20df5" />
+<img width="1919" height="983" alt="image" src="https://github.com/user-attachments/assets/90cf9217-80fd-4d44-9d61-e0eec5903dc3" />
+<img width="1919" height="1026" alt="image" src="https://github.com/user-attachments/assets/1db627e2-53b0-4c54-9226-c66f9379f741" />
 
 ## The story behind it
 
@@ -50,6 +55,8 @@ until the real bank registers and enters stock themselves. That's the honest ver
 the feature, even though it means most of the map starts at zero. The demo accounts
 below exist so there's at least one bank with live stock to actually click through.
 
+And every result is displayed sorted in order of nearest to furthest location wise.
+
 ## Tech stack
 
 Django 6.1, server-rendered templates with Bootstrap 5, PostgreSQL in production
@@ -69,18 +76,11 @@ static/css/           custom.css (layered on Bootstrap)
 data/blood_banks.csv  real blood bank directory (see above)
 ```
 
-## Try it yourself
-
-Both use password `raktkosh123`:
-
-- `demo_donor` ("Demo User") — a few live requests across different cities
-- `demo_bank` ("Demo Blood Bank") — live stock across every blood group, plus a couple of posted drives
-
 ## Running it locally
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate          # Windows; use `source .venv/bin/activate` on macOS/Linux
+.venv\Scripts\activate     
 pip install -r requirements.txt
 
 copy .env.example .env          # then fill in SECRET_KEY etc.
@@ -106,28 +106,17 @@ python manage.py test
    string.
 2. Create a Web Service on [Render](https://render.com) pointing at this repo:
    - Build command: `pip install -r requirements.txt`
-   - Start command: `python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn raktkosh.wsgi`
-     (the free tier has no shell access, so static collection and migrations run on
-     every startup instead — both are cheap and safe to repeat. See `Procfile`.)
+   - Start command: `python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py import_real_banks && python manage.py populate_demo_content && gunicorn raktkosh.wsgi`
+     (the free tier has no shell access, so static collection, migrations, and data
+     population all run on every startup instead — all four are safe to repeat. See
+     `Procfile`.)
    - Environment variables: `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS` (your
      `.onrender.com` domain), `DATABASE_URL` (from Neon).
-3. Load the real bank directory and demo accounts **once**, from your own machine,
-   pointed at the production database (there's no Render shell to run them from):
-   ```bash
-   DATABASE_URL=<your Neon connection string> python manage.py import_real_banks
-   DATABASE_URL=<your Neon connection string> python manage.py populate_demo_content
-   ```
-   These used to be chained into the start command so they'd run on every boot, but
-   `import_real_banks` does one existence-check query per CSV row — with 2,400+ rows,
-   that's 2,400+ round-trips to the database before the app can even start serving
-   requests. On Render's free tier, where the service spins down after ~15 minutes of
-   inactivity and has to cold-boot on the next visit, that turned every wake-up into a
-   several-minute hang. The data doesn't need re-checking on every restart — Postgres
-   already has it durably stored — so these only need to run again if the source CSV
-   changes.
-4. Visit the live URL once the first deploy finishes.
+3. Visit the live URL once the first deploy finishes.
 
 ## Data attribution
 
 The blood bank directory in `data/blood_banks.csv` is derived from India's National
 Health Portal Blood Bank Directory, distributed as open government data.
+
+## Swasti Gupta
