@@ -40,7 +40,10 @@ class BloodBankProfile(models.Model):
     bank_name = models.CharField(max_length=200)
     address = models.CharField(max_length=300)
     city = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20, blank=True)
+    # Real directory listings often carry several numbers in one field
+    # (e.g. "011 42251800, 011 42251868, ..."), so this is deliberately
+    # generous rather than a single-number width.
+    phone = models.CharField(max_length=255, blank=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
     is_imported = models.BooleanField(default=False)

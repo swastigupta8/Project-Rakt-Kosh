@@ -6,10 +6,18 @@ from django.db import transaction
 from geopy.extra.rate_limiter import RateLimiter
 from geopy.geocoders import Nominatim
 
-from accounts.models import BloodBankProfile, User
+from accounts.models import BloodBankProfile, DonorProfile, User
 from blood_requests.models import BloodRequest
 from drives.models import DonationDrive
 from inventory.models import BloodUnit
+
+DEMO_PASSWORD = 'raktkosh123'
+DEMO_DONOR_CITY = 'Pune, India'
+DEMO_DONOR_BLOOD_GROUP = 'O+'
+DEMO_BANK_NAME = 'Demo Blood Bank'
+DEMO_BANK_ADDRESS = 'FC Road'
+DEMO_BANK_CITY = 'Pune, India'
+DEMO_BANK_PHONE = '020-1234567'
 
 REQUEST_CITIES = [
     ('Mumbai, India', 'B+', 2),
@@ -30,45 +38,71 @@ STOCK_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'O+', 'O-']
 
 class Command(BaseCommand):
     help = (
-        'Populate demo blood requests (attributed to --donor) and drives/stock '
-        '(for --bank) so there is real-looking content to show. Both accounts must '
-        'already exist (registered through the site) — if either is missing, this '
-        'logs a warning and does nothing rather than failing, so it is safe to run '
-        'unconditionally on every deploy. Safe to re-run: skips rows already created.'
+        "Create (or reuse) a 'Demo User' donor account and a 'Demo Blood Bank' bank "
+        f"account (password '{DEMO_PASSWORD}'), then populate them with a few blood "
+        "requests, drives, and blood stock so there's real-looking content to show. "
+        "Fully self-contained and idempotent — safe to run on every deploy."
     )
 
-    def add_arguments(self, parser):
-        parser.add_argument('--donor', default='swastigupta')
-        parser.add_argument('--bank', default='testbloodbank')
-
     def handle(self, *args, **options):
-        donor = User.objects.filter(username=options['donor']).first()
-        if donor is None:
-            self.stdout.write(self.style.WARNING(
-                f"No user '{options['donor']}' yet — skipping demo request population."
-            ))
-            donor = None
-
-        bank = BloodBankProfile.objects.filter(user__username=options['bank']).first()
-        if bank is None:
-            self.stdout.write(self.style.WARNING(
-                f"No blood bank account '{options['bank']}' yet — skipping demo drive/stock population."
-            ))
-
-        if donor is None and bank is None:
-            return
-
         geolocator = Nominatim(user_agent='raktkosh-populate', timeout=10)
         geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
 
         with transaction.atomic():
+            donor = self._get_or_create_demo_donor(geocode)
+            bank = self._get_or_create_demo_bank(geocode)
             if donor is not None:
-                self._create_requests(donor.get_full_name() or donor.username, geocode)
+                self._create_requests(donor.get_full_name(), geocode)
             if bank is not None:
                 self._create_drives(bank)
                 self._create_stock(bank)
 
-        self.stdout.write(self.style.SUCCESS('Demo content populated.'))
+        self.stdout.write(self.style.SUCCESS('Demo content ready.'))
+
+    def _get_or_create_demo_donor(self, geocode):
+        user, created = User.objects.get_or_create(
+            username='demo_donor',
+            defaults={'first_name': 'Demo', 'last_name': 'User', 'role': User.Role.DONOR},
+        )
+        if created:
+            user.set_password(DEMO_PASSWORD)
+            user.save()
+        if not hasattr(user, 'donor_profile'):
+            result = geocode(DEMO_DONOR_CITY)
+            if result is None:
+                self.stdout.write(self.style.WARNING(f'Could not geocode {DEMO_DONOR_CITY} for demo donor'))
+                return None
+            DonorProfile.objects.create(
+                user=user,
+                blood_group=DEMO_DONOR_BLOOD_GROUP,
+                city=DEMO_DONOR_CITY,
+                latitude=result.latitude,
+                longitude=result.longitude,
+            )
+        return user
+
+    def _get_or_create_demo_bank(self, geocode):
+        user, created = User.objects.get_or_create(
+            username='demo_bank', defaults={'role': User.Role.BANK},
+        )
+        if created:
+            user.set_password(DEMO_PASSWORD)
+            user.save()
+        if hasattr(user, 'bank_profile'):
+            return user.bank_profile
+        result = geocode(f'{DEMO_BANK_ADDRESS}, {DEMO_BANK_CITY}')
+        if result is None:
+            self.stdout.write(self.style.WARNING(f'Could not geocode {DEMO_BANK_ADDRESS}, {DEMO_BANK_CITY}'))
+            return None
+        return BloodBankProfile.objects.create(
+            user=user,
+            bank_name=DEMO_BANK_NAME,
+            address=DEMO_BANK_ADDRESS,
+            city=DEMO_BANK_CITY,
+            phone=DEMO_BANK_PHONE,
+            latitude=result.latitude,
+            longitude=result.longitude,
+        )
 
     def _create_requests(self, requester_name, geocode):
         for city, group, units in REQUEST_CITIES:

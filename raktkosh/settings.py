@@ -2,10 +2,12 @@
 Django settings for the Rakt-Kosh project.
 """
 
+import os
 from pathlib import Path
 
 import dj_database_url
 from decouple import Csv, config
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -74,6 +76,18 @@ WSGI_APPLICATION = 'raktkosh.wsgi.application'
 
 # Database: falls back to local SQLite when DATABASE_URL isn't set (local dev),
 # and uses whatever Postgres URL is provided in production (Neon/Render).
+#
+# In production (DEBUG=False) that fallback is refused outright: a host whose
+# filesystem doesn't persist across restarts (e.g. Render) would otherwise
+# silently run on a fresh, empty SQLite file instead of the real database —
+# no error, just quietly-vanished data on the next restart. Loud failure here
+# beats a working-looking site with a database that resets itself.
+if not DEBUG and 'DATABASE_URL' not in os.environ:
+    raise ImproperlyConfigured(
+        'DATABASE_URL is not set. Refusing to fall back to local SQLite in '
+        'production — that file will not survive a restart on most hosts.'
+    )
+
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",

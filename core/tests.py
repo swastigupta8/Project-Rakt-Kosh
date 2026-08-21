@@ -15,7 +15,8 @@ class HomeViewTests(TestCase):
     def test_home_loads_for_anonymous_visitor(self):
         response = self.client.get(reverse('core:home'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Manage your bank')
+        self.assertContains(response, 'For Donors &amp; Patients')
+        self.assertContains(response, 'For Blood Banks &amp; Hospitals')
 
     def test_home_shows_donor_actions_for_donor(self):
         donor = User.objects.create_user(username='donor1', password='pass12345', role=User.Role.DONOR)
@@ -45,34 +46,33 @@ class HomeViewTests(TestCase):
 
 
 class PopulateDemoContentTests(TestCase):
-    def test_missing_accounts_is_a_no_op(self):
-        call_command('populate_demo_content', donor='nope', bank='nope')
-        self.assertEqual(BloodRequest.objects.count(), 0)
-
     @patch('core.management.commands.populate_demo_content.RateLimiter', lambda func, **kwargs: func)
     @patch('core.management.commands.populate_demo_content.Nominatim')
-    def test_populates_and_is_idempotent(self, mock_nominatim_cls):
+    def test_creates_demo_accounts_and_is_idempotent(self, mock_nominatim_cls):
         fake_result = MagicMock(latitude=18.52, longitude=73.85)
         mock_nominatim_cls.return_value.geocode.return_value = fake_result
 
-        User.objects.create_user(
-            username='swastigupta', password='x', first_name='Swasti', last_name='Gupta', role=User.Role.DONOR,
-        )
-        bank_user = User.objects.create_user(username='testbloodbank', password='x', role=User.Role.BANK)
-        bank = BloodBankProfile.objects.create(
-            user=bank_user, bank_name='Test Blood Bank', address='addr', city='Pune',
-            latitude=18.5204, longitude=73.8567,
-        )
-
         call_command('populate_demo_content')
 
-        self.assertEqual(BloodRequest.objects.filter(requester_name='Swasti Gupta').count(), 5)
+        donor = User.objects.get(username='demo_donor')
+        self.assertEqual(donor.role, User.Role.DONOR)
+        self.assertTrue(donor.check_password('raktkosh123'))
+        self.assertEqual(donor.get_full_name(), 'Demo User')
+
+        bank_user = User.objects.get(username='demo_bank')
+        self.assertEqual(bank_user.role, User.Role.BANK)
+        bank = bank_user.bank_profile
+        self.assertEqual(bank.bank_name, 'Demo Blood Bank')
+
+        self.assertEqual(BloodRequest.objects.filter(requester_name='Demo User').count(), 5)
         self.assertEqual(DonationDrive.objects.filter(bank=bank).count(), 3)
         self.assertEqual(BloodUnit.objects.filter(bank=bank).count(), 7)
 
         call_command('populate_demo_content')
 
-        self.assertEqual(BloodRequest.objects.filter(requester_name='Swasti Gupta').count(), 5)
+        self.assertEqual(User.objects.filter(username='demo_donor').count(), 1)
+        self.assertEqual(User.objects.filter(username='demo_bank').count(), 1)
+        self.assertEqual(BloodRequest.objects.filter(requester_name='Demo User').count(), 5)
         self.assertEqual(DonationDrive.objects.filter(bank=bank).count(), 3)
         self.assertEqual(BloodUnit.objects.filter(bank=bank).count(), 7)
 

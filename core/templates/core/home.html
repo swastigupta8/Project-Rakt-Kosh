@@ -81,21 +81,47 @@
     <a href="{% url 'blood_requests:submit' %}" class="btn btn-outline-light btn-lg">Request Blood</a>
   </div>
 
+  <div class="section-heading">
+    <h2>For Donors &amp; Patients</h2>
+    <span class="section-tag">No account required</span>
+  </div>
   <div class="action-grid">
     <a href="{% url 'inventory:search' %}" class="action-card">
       <span class="action-icon">{% include "partials/icons/_search.html" %}</span>
-      <h3>Search nearby stock</h3>
-      <p>Search by city and blood group to see which nearby blood banks have units in stock, ranked by distance.</p>
+      <h3>Find Blood</h3>
+      <p>Search by city and blood group to see which nearby blood banks have stock, ranked by distance.</p>
+    </a>
+    <a href="{% url 'blood_requests:submit' %}" class="action-card">
+      <span class="action-icon">{% include "partials/icons/_heart.html" %}</span>
+      <h3>Request Blood</h3>
+      <p>Submit a request so nearby blood banks can see it and respond directly.</p>
     </a>
     <a href="{% url 'drives:nearby' %}" class="action-card">
       <span class="action-icon">{% include "partials/icons/_calendar.html" %}</span>
-      <h3>Find a donation drive</h3>
+      <h3>Find a Donation Drive</h3>
       <p>Browse donation drives organized by blood banks and hospitals near you.</p>
+    </a>
+  </div>
+
+  <div class="section-heading">
+    <h2>For Blood Banks &amp; Hospitals</h2>
+    <span class="section-tag">Register to unlock</span>
+  </div>
+  <div class="action-grid">
+    <a href="{% url 'accounts:register_bank' %}" class="action-card">
+      <span class="action-icon">{% include "partials/icons/_droplet.html" %}</span>
+      <h3>Manage Inventory</h3>
+      <p>Keep your live blood stock updated so patients searching nearby can find it.</p>
     </a>
     <a href="{% url 'accounts:register_bank' %}" class="action-card">
       <span class="action-icon">{% include "partials/icons/_building.html" %}</span>
-      <h3>Manage your bank's stock</h3>
-      <p>Blood banks and hospitals can register to keep their live inventory and drives current.</p>
+      <h3>Post Donation Drives</h3>
+      <p>Announce upcoming drives so nearby donors can find and attend them.</p>
+    </a>
+    <a href="{% url 'accounts:register_bank' %}" class="action-card">
+      <span class="action-icon">{% include "partials/icons/_inbox.html" %}</span>
+      <h3>View Blood Requests</h3>
+      <p>See pending requests near you, sorted by distance, and respond directly.</p>
     </a>
   </div>
 
